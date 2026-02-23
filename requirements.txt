@@ -1,0 +1,29 @@
+# Student Management System - Requirements
+
+# Flask Web Application Dependencies
+Flask>=2.0.0
+Flask-Login>=0.6.0
+Werkzeug>=2.0.0
+
+# Production Server
+gunicorn>=20.0.0
+
+# To run the Flask web application (Development):
+# pip install -r requirements.txt
+# python app.py
+# Open browser: http://127.0.0.1:5000
+
+# To run with Gunicorn (Production):
+# gunicorn app:app
+# OR gunicorn -w 4 -b 0.0.0.0:8000 app:app
+
+# For standalone HTML version (no Flask needed):
+# - Simply open index.html in any modern web browser
+
+# Project Files:
+# - app.py: Flask web application
+# - templates/index.html: HTML template
+# - static/styles.css: CSS styles
+# - static/script.js: JavaScript functionality
+# - student_file.py: Original CLI version
+# - Procfile: For deployment platforms (Heroku, etc.)
