@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from urllib.parse import unquote
 import json
 import os
 
@@ -209,6 +210,7 @@ def add_student():
 @app.route('/api/students/<roll>', methods=['GET'])
 @login_required
 def search_student(roll):
+    roll = unquote(roll)
     students = load_students()
     for s in students:
         if s["roll"] == roll:
@@ -216,10 +218,46 @@ def search_student(roll):
     return jsonify({"success": False, "message": "Student not found!"}), 404
 
 
-# PUT - Update student
+# PUT - Update student by index
+@app.route('/api/students/index/<int:index>', methods=['PUT'])
+@login_required
+def update_student_by_index(index):
+    students = load_students()
+    data = request.get_json()
+    
+    if index < 0 or index >= len(students):
+        return jsonify({"success": False, "message": "Student not found!"}), 404
+    
+    # Keep the original roll number, update only other fields
+    students[index]['name'] = data.get('name')
+    students[index]['age'] = data.get('age')
+    students[index]['branch'] = data.get('branch')
+    students[index]['marks'] = data.get('marks')
+    
+    save_students(students)
+    return jsonify({"success": True, "message": "Student updated successfully!"})
+
+
+# DELETE - Delete student by index
+@app.route('/api/students/index/<int:index>', methods=['DELETE'])
+@login_required
+def delete_student_by_index(index):
+    students = load_students()
+    
+    if index < 0 or index >= len(students):
+        return jsonify({"success": False, "message": "Student not found!"}), 404
+    
+    students.pop(index)
+    save_students(students)
+    return jsonify({"success": True, "message": "Student deleted successfully!"})
+
+
+# Legacy endpoints - kept for backward compatibility
+# PUT - Update student (by roll number)
 @app.route('/api/students/<roll>', methods=['PUT'])
 @login_required
 def update_student(roll):
+    roll = unquote(roll)
     students = load_students()
     data = request.get_json()
     
@@ -238,10 +276,11 @@ def update_student(roll):
     return jsonify({"success": False, "message": "Student not found!"}), 404
 
 
-# DELETE - Delete student
+# DELETE - Delete student (by roll number)
 @app.route('/api/students/<roll>', methods=['DELETE'])
 @login_required
 def delete_student(roll):
+    roll = unquote(roll)
     students = load_students()
     
     for i, s in enumerate(students):
